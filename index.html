@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IMIP – Pesquisa de Satisfação 2025–2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+  :root {
+    --azul-imip: #1a4e8c;
+    --azul-medio: #2563b0;
+    --azul-claro: #3b82d4;
+    --verde-sucesso: #16a34a;
+    --verde-claro: #22c55e;
+    --amarelo: #f59e0b;
+    --laranja: #ea580c;
+    --cinza-fundo: #f0f4fa;
+    --cinza-card: #ffffff;
+    --cinza-borda: #e2e8f0;
+    --cinza-texto: #475569;
+    --texto-escuro: #0f172a;
+    --sombra: 0 4px 24px rgba(26,78,140,0.08);
+    --sombra-hover: 0 8px 32px rgba(26,78,140,0.16);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--cinza-fundo);
+    color: var(--texto-escuro);
+    min-height: 100vh;
+  }
+
+  .header {
+    background: linear-gradient(135deg, var(--azul-imip) 0%, var(--azul-medio) 60%, #1d6fa8 100%);
+    padding: 48px 40px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 20%;
+    width: 200px; height: 200px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  .header-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 12px;
+  }
+  .header-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+  .header-title span { color: #93c5fd; }
+  .header-sub {
+    font-size: 14px;
+    color: rgba(255,255,255,0.65);
+    font-weight: 400;
+    margin-top: 8px;
+  }
+  .header-badge {
+    display: inline-block;
+    margin-top: 20px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.85);
+    font-weight: 500;
+  }
+
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px 60px;
+  }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+  .kpi-card {
+    background: var(--cinza-card);
+    border-radius: 16px;
+    padding: 28px 24px;
+    box-shadow: var(--sombra);
+    border-top: 4px solid transparent;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .kpi-card:hover { box-shadow: var(--sombra-hover); transform: translateY(-2px); }
+  .kpi-card.azul { border-top-color: var(--azul-claro); }
+  .kpi-card.verde { border-top-color: var(--verde-claro); }
+  .kpi-card.amarelo { border-top-color: var(--amarelo); }
+  .kpi-card.laranja { border-top-color: var(--laranja); }
+
+  .kpi-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--cinza-texto);
+    margin-bottom: 12px;
+  }
+  .kpi-valor {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .kpi-card.azul .kpi-valor { color: var(--azul-medio); }
+  .kpi-card.verde .kpi-valor { color: var(--verde-sucesso); }
+  .kpi-card.amarelo .kpi-valor { color: #b45309; }
+  .kpi-card.laranja .kpi-valor { color: var(--laranja); }
+
+  .kpi-delta {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--verde-sucesso);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .kpi-delta::before { content: '↑'; font-size: 13px; }
+  .kpi-context { font-size: 12px; color: var(--cinza-texto); margin-top: 4px; }
+
+  .section-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--texto-escuro);
+    margin-bottom: 4px;
+    letter-spacing: -0.3px;
+  }
+  .section-sub { font-size: 12px; color: var(--cinza-texto); margin-bottom: 20px; }
+
+  .charts-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  .charts-grid-3 {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  .chart-card {
+    background: var(--cinza-card);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: var(--sombra);
+    transition: box-shadow 0.2s;
+  }
+  .chart-card:hover { box-shadow: var(--sombra-hover); }
+
+  .chart-wrap { position: relative; height: 280px; }
+  .chart-wrap.tall { height: 340px; }
+  .chart-wrap.short { height: 220px; }
+
+  .divider { border: none; border-top: 1px solid var(--cinza-borda); margin: 32px 0; }
+
+  .qual-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .qual-table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--cinza-texto);
+    background: var(--cinza-fundo);
+    border-bottom: 2px solid var(--cinza-borda);
+  }
+  .qual-table td {
+    padding: 14px 14px;
+    border-bottom: 1px solid var(--cinza-borda);
+    vertical-align: top;
+    line-height: 1.5;
+    color: #334155;
+  }
+  .qual-table tr:last-child td { border-bottom: none; }
+  .qual-table tr:hover td { background: #f8faff; }
+
+  .pill { display: inline-block; border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 600; }
+  .pill-reclamacao { background: #fee2e2; color: #b91c1c; }
+  .pill-melhoria   { background: #dcfce7; color: #15803d; }
+  .pill-acao       { background: #dbeafe; color: #1d4ed8; }
+
+  .footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 11px;
+    color: #94a3b8;
+    letter-spacing: 0.5px;
+  }
+
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .charts-grid-2, .charts-grid-3 { grid-template-columns: 1fr; }
+    .header-title { font-size: 1.8rem; }
+  }
+  @media (max-width: 600px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+    .main { padding: 24px 16px 40px; }
+    .header { padding: 32px 20px 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="header-eyebrow">Instituto de Medicina Integral Prof. Fernando Figueira</div>
+    <div class="header-title">Pesquisa de <span>Satisfação</span><br>de Pacientes</div>
+    <div class="header-sub">Análise completa dos indicadores de qualidade assistencial</div>
+    <div class="header-badge">📋 Ciclo 2025 – 2026 &nbsp;·&nbsp; 1.306 respondentes &nbsp;·&nbsp; 4 semestres</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="kpi-grid">
+    <div class="kpi-card azul">
+      <div class="kpi-label">Nota Média 2026</div>
+      <div class="kpi-valor">8,45</div>
+      <div class="kpi-delta">+0,85 vs 2025</div>
+      <div class="kpi-context">Em escala de 0 a 10</div>
+    </div>
+    <div class="kpi-card verde">
+      <div class="kpi-label">% Satisfeitos 2026</div>
+      <div class="kpi-valor">92%</div>
+      <div class="kpi-delta">+25 p.p. vs 2025</div>
+      <div class="kpi-context">Pacientes com nota ≥ 8</div>
+    </div>
+    <div class="kpi-card amarelo">
+      <div class="kpi-label">NPS Estimado 2026</div>
+      <div class="kpi-valor">67</div>
+      <div class="kpi-delta">+25 pontos vs 2025</div>
+      <div class="kpi-context">Zona de Excelência</div>
+    </div>
+    <div class="kpi-card laranja">
+      <div class="kpi-label">Total Respondentes</div>
+      <div class="kpi-valor">1.306</div>
+      <div class="kpi-context">Nos 4 semestres avaliados</div>
+    </div>
+  </div>
+
+  <div class="charts-grid-2">
+    <div class="chart-card">
+      <div class="section-title">Evolução da Nota Geral por Semestre</div>
+      <div class="section-sub">Progressão de 7,28 a 8,45 — melhoria contínua ao longo dos ciclos</div>
+      <div class="chart-wrap"><canvas id="chartEvolucao"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="section-title">Perfil por Indicador — 2025 vs 2026</div>
+      <div class="section-sub">Comparação radar das médias anuais entre os dois anos</div>
+      <div class="chart-wrap"><canvas id="chartRadar"></canvas></div>
+    </div>
+  </div>
+
+  <div class="charts-grid-3">
+    <div class="chart-card">
+      <div class="section-title">Evolução por Indicador ao Longo dos Semestres</div>
+      <div class="section-sub">Limpeza · Cuidados Médicos · Atendimento · Tempo de Espera</div>
+      <div class="chart-wrap tall"><canvas id="chartIndicadores"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="section-title">NPS Estimado por Semestre</div>
+      <div class="section-sub">Escala de –100 a +100</div>
+      <div class="chart-wrap tall"><canvas id="chartNPS"></canvas></div>
+    </div>
+  </div>
+
+  <div class="charts-grid-2">
+    <div class="chart-card">
+      <div class="section-title">Variação Percentual 2025 → 2026 por Indicador</div>
+      <div class="section-sub">Tempo de Espera apresentou maior crescimento relativo (+17,7%)</div>
+      <div class="chart-wrap short"><canvas id="chartVariacao"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="section-title">% de Pacientes Satisfeitos por Semestre</div>
+      <div class="section-sub">Nota ≥ 8 — salto de 66,9% para 92,0%</div>
+      <div class="chart-wrap short"><canvas id="chartSatisfeitos"></canvas></div>
+    </div>
+  </div>
+
+  <div class="chart-card" style="margin-bottom:24px;">
+    <div class="section-title">Comparativo Detalhado — Todos os Semestres por Indicador</div>
+    <div class="section-sub">Visualização agrupada para identificar lacunas e avanços em cada área assistencial</div>
+    <div class="chart-wrap tall"><canvas id="chartBarras"></canvas></div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="chart-card">
+    <div class="section-title">Análise Qualitativa de Feedbacks — Resumo por Categoria</div>
+    <div class="section-sub" style="margin-bottom:16px;">Principais reclamações de 2025, melhorias percebidas em 2026 e ações implementadas pelo IMIP</div>
+    <table class="qual-table">
+      <thead>
+        <tr>
+          <th>Indicador</th>
+          <th>Principal Reclamação 2025</th>
+          <th>Melhoria Percebida 2026</th>
+          <th>Ação Implementada</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>🧹 Limpeza Hospitalar</strong></td>
+          <td><span class="pill pill-reclamacao">Reclamação</span><br><br>Corredores sujos e banheiros com odor</td>
+          <td><span class="pill pill-melhoria">Melhoria</span><br><br>Melhora visível na limpeza das enfermarias</td>
+          <td><span class="pill pill-acao">Ação</span><br><br>Contratação de equipe terceirizada especializada</td>
+        </tr>
+        <tr>
+          <td><strong>🩺 Cuidados Médicos</strong></td>
+          <td><span class="pill pill-reclamacao">Reclamação</span><br><br>Falta de clareza nas explicações médicas</td>
+          <td><span class="pill pill-melhoria">Melhoria</span><br><br>Comunicação mais acessível e humanizada</td>
+          <td><span class="pill pill-acao">Ação</span><br><br>Treinamento em humanização e comunicação</td>
+        </tr>
+        <tr>
+          <td><strong>🏥 Atendimento Recepção</strong></td>
+          <td><span class="pill pill-reclamacao">Reclamação</span><br><br>Filas longas e atendentes pouco atenciosos</td>
+          <td><span class="pill pill-melhoria">Melhoria</span><br><br>Redução de filas; atendentes mais cordiais</td>
+          <td><span class="pill pill-acao">Ação</span><br><br>Implantação de totem de autoatendimento</td>
+        </tr>
+        <tr>
+          <td><strong>⏱ Tempo de Espera</strong></td>
+          <td><span class="pill pill-reclamacao">Reclamação</span><br><br>Espera média acima de 3h nas urgências</td>
+          <td><span class="pill pill-melhoria">Melhoria</span><br><br>Espera reduzida para ~1h40 em média</td>
+          <td><span class="pill pill-acao">Ação</span><br><br>Novo sistema de triagem e gestão de fluxo</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<div class="footer">
+  IMIP – Instituto de Medicina Integral Prof. Fernando Figueira &nbsp;·&nbsp; Pesquisa de Satisfação 2025–2026 &nbsp;·&nbsp; Dados simulados para fins acadêmicos – Business Intelligence | Marketing
+</div>
+
+<script>
+const COR_AZUL    = '#2563b0';
+const COR_VERDE   = '#16a34a';
+const COR_AMARELO = '#f59e0b';
+const COR_LARANJA = '#ea580c';
+
+const SEMESTRES = ['1º Sem/2025', '2º Sem/2025', '1º Sem/2026', '2º Sem/2026'];
+
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color = '#64748b';
+Chart.defaults.plugins.legend.labels.boxWidth = 12;
+Chart.defaults.plugins.legend.labels.padding = 16;
+
+// 1. Evolução Nota Geral
+new Chart(document.getElementById('chartEvolucao'), {
+  type: 'line',
+  data: {
+    labels: SEMESTRES,
+    datasets: [{
+      label: 'Nota Geral Média',
+      data: [7.275, 7.6, 8.125, 8.45],
+      borderColor: COR_AZUL,
+      backgroundColor: 'rgba(37,99,176,0.12)',
+      borderWidth: 3,
+      pointBackgroundColor: COR_AZUL,
+      pointRadius: 6, pointHoverRadius: 8,
+      tension: 0.35, fill: true,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ` Nota: ${ctx.parsed.y.toFixed(2)}` } }
+    },
+    scales: {
+      y: { min: 6, max: 10, grid: { color: '#e2e8f0' }, ticks: { stepSize: 0.5 } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// 2. Radar 2025 vs 2026
+new Chart(document.getElementById('chartRadar'), {
+  type: 'radar',
+  data: {
+    labels: ['Limpeza\nHospitalar', 'Cuidados\nMédicos', 'Atend.\nRecepção', 'Tempo de\nEspera'],
+    datasets: [
+      {
+        label: '2025 (média)',
+        data: [7.4, 8.2, 7.65, 6.5],
+        borderColor: COR_AMARELO, backgroundColor: 'rgba(245,158,11,0.15)',
+        borderWidth: 2, pointBackgroundColor: COR_AMARELO,
+      },
+      {
+        label: '2026 (média)',
+        data: [8.25, 8.8, 8.45, 7.65],
+        borderColor: COR_AZUL, backgroundColor: 'rgba(37,99,176,0.15)',
+        borderWidth: 2, pointBackgroundColor: COR_AZUL,
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom' } },
+    scales: {
+      r: {
+        min: 5, max: 10,
+        ticks: { stepSize: 1, backdropColor: 'transparent', font: { size: 10 } },
+        grid: { color: '#e2e8f0' }, angleLines: { color: '#e2e8f0' },
+        pointLabels: { font: { size: 11, weight: '500' } }
+      }
+    }
+  }
+});
+
+// 3. Indicadores — Linha Multi-série
+new Chart(document.getElementById('chartIndicadores'), {
+  type: 'line',
+  data: {
+    labels: SEMESTRES,
+    datasets: [
+      { label: 'Limpeza Hospitalar', data: [7.2, 7.6, 8.1, 8.4], borderColor: COR_AZUL, backgroundColor: 'transparent', borderWidth: 2.5, pointRadius: 5, tension: 0.3 },
+      { label: 'Cuidados Médicos',   data: [8.1, 8.3, 8.7, 8.9], borderColor: COR_VERDE, backgroundColor: 'transparent', borderWidth: 2.5, pointRadius: 5, tension: 0.3 },
+      { label: 'Atend. Recepção',    data: [7.5, 7.8, 8.3, 8.6], borderColor: COR_AMARELO, backgroundColor: 'transparent', borderWidth: 2.5, pointRadius: 5, tension: 0.3 },
+      { label: 'Tempo de Espera',    data: [6.3, 6.7, 7.4, 7.9], borderColor: COR_LARANJA, backgroundColor: 'transparent', borderWidth: 2.5, pointRadius: 5, tension: 0.3, borderDash: [5,3] }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom' } },
+    scales: {
+      y: { min: 5.5, max: 10, grid: { color: '#e2e8f0' }, ticks: { stepSize: 0.5 } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// 4. NPS — Barras Verticais
+new Chart(document.getElementById('chartNPS'), {
+  type: 'bar',
+  data: {
+    labels: SEMESTRES,
+    datasets: [{
+      label: 'NPS Estimado',
+      data: [42, 50, 63, 67],
+      backgroundColor: ['rgba(245,158,11,0.75)', 'rgba(245,158,11,0.9)', 'rgba(37,99,176,0.8)', 'rgba(22,163,74,0.85)'],
+      borderRadius: 8, borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` NPS: ${ctx.parsed.y}` } } },
+    scales: {
+      y: { min: 0, max: 80, grid: { color: '#e2e8f0' }, ticks: { stepSize: 10 } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// 5. Variação % — Barra Horizontal
+new Chart(document.getElementById('chartVariacao'), {
+  type: 'bar',
+  data: {
+    labels: ['Tempo de Espera', 'Limpeza Hospitalar', 'Atend. Recepção', 'Cuidados Médicos'],
+    datasets: [{
+      label: 'Variação %',
+      data: [17.7, 11.5, 10.5, 7.3],
+      backgroundColor: ['rgba(22,163,74,0.85)', 'rgba(37,99,176,0.8)', 'rgba(124,58,237,0.8)', 'rgba(245,158,11,0.85)'],
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` +${ctx.parsed.x.toFixed(1)}%` } } },
+    scales: {
+      x: { min: 0, max: 22, grid: { color: '#e2e8f0' }, ticks: { callback: v => `${v}%` } },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// 6. % Satisfeitos — Área
+new Chart(document.getElementById('chartSatisfeitos'), {
+  type: 'line',
+  data: {
+    labels: SEMESTRES,
+    datasets: [{
+      label: '% Satisfeitos (nota ≥ 8)',
+      data: [66.9, 75.0, 88.1, 92.0],
+      borderColor: COR_VERDE, backgroundColor: 'rgba(22,163,74,0.15)',
+      borderWidth: 3, pointBackgroundColor: COR_VERDE,
+      pointRadius: 6, tension: 0.35, fill: true,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y.toFixed(1)}%` } } },
+    scales: {
+      y: { min: 55, max: 100, grid: { color: '#e2e8f0' }, ticks: { callback: v => `${v}%`, stepSize: 10 } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// 7. Barras Agrupadas
+new Chart(document.getElementById('chartBarras'), {
+  type: 'bar',
+  data: {
+    labels: SEMESTRES,
+    datasets: [
+      { label: 'Limpeza Hospitalar', data: [7.2, 7.6, 8.1, 8.4], backgroundColor: 'rgba(37,99,176,0.82)',   borderRadius: 4 },
+      { label: 'Cuidados Médicos',   data: [8.1, 8.3, 8.7, 8.9], backgroundColor: 'rgba(22,163,74,0.82)',   borderRadius: 4 },
+      { label: 'Atend. Recepção',    data: [7.5, 7.8, 8.3, 8.6], backgroundColor: 'rgba(124,58,237,0.82)',  borderRadius: 4 },
+      { label: 'Tempo de Espera',    data: [6.3, 6.7, 7.4, 7.9], backgroundColor: 'rgba(234,88,12,0.82)',   borderRadius: 4 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom' } },
+    scales: {
+      y: { min: 5, max: 10, grid: { color: '#e2e8f0' }, ticks: { stepSize: 0.5 } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+</script>
+</body>
+</html>
